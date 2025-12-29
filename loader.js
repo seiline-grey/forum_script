@@ -6,8 +6,8 @@
         GITHUB_USER: 'YourGitHubUsername',
         REPO: 'my-scripts-licenses',
         BRANCH: 'main',
-        LICENSE_FILE: 'licenses/domains.json',
-        SCRIPT_PATH: 'licenses/scripts/',
+        LICENSE_FILE: 'my-scripts-licenses/domains.json',
+        SCRIPT_PATH: 'my-scripts-licenses/scripts/',
         TOKEN_PART1: 'github_pat_11B27L75Y01hZzt9UvbmgB',  // Разделите токен на части для безопасности
         TOKEN_PART2: '_iCDDG1fdH3FHUGcKrDJHKVycxI5kVS7jUIa1Q',
         TOKEN_PART3: 'v5zj3eGH7C3RVYsvOlz61K'
