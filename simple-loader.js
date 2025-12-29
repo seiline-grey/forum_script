@@ -1,10 +1,9 @@
-// УПРОЩЕННЫЙ ЗАГРУЗЧИК - simple-loader.js
-console.log('🎯 Загрузчик лицензий запущен');
+// simple-loader.js - ИСПРАВЛЕННАЯ ВЕРСИЯ
+console.log('🎯 Загрузчик лицензий загружен!');
 
-// Простейший проверщик лицензий
 window.SimpleLicenseChecker = class SimpleLicenseChecker {
     constructor(licenseKey) {
-        console.log('🔑 Конструктор вызван с ключом:', licenseKey);
+        console.log('🔧 Конструктор вызван с ключом:', licenseKey);
         this.licenseKey = licenseKey;
         this.domain = window.location.hostname;
         
@@ -16,6 +15,49 @@ window.SimpleLicenseChecker = class SimpleLicenseChecker {
         
         console.log('🌐 Текущий домен:', this.domain);
         console.log('📋 Разрешенные домены:', Object.keys(this.validDomains));
+    }
+    
+    async loadScript() {
+        console.log('🚀 Начало загрузки скрипта...');
+        
+        // Проверяем лицензию
+        if (!this.checkLicense()) {
+            console.error('⛔ Лицензия недействительна, останавливаемся');
+            this.showError('Лицензия недействительна для ' + this.domain);
+            return;
+        }
+        
+        console.log('✅ Лицензия проверена, загружаем скрипт...');
+        
+        // Генерируем имя файла (ИСПРАВЛЕНО!)
+        const fileName = this.generateFileName();
+        console.log('📄 Имя файла скрипта:', fileName);
+        
+        // URL на GitHub
+        const scriptUrl = `https://raw.githubusercontent.com/seiline-grey/my-scripts-licenses/main/scripts/${fileName}`;
+        console.log('🌍 Загружаем из:', scriptUrl);
+        
+        try {
+            // Загружаем файл
+            const response = await fetch(scriptUrl);
+            console.log('📡 Ответ сервера:', response.status, response.statusText);
+            
+            if (!response.ok) {
+                throw new Error(`Не удалось загрузить скрипт: ${response.status}`);
+            }
+            
+            // Получаем закодированный скрипт
+            const encodedScript = await response.text();
+            console.log('✅ Скрипт загружен, размер:', encodedScript.length, 'символов');
+            console.log('📝 Первые 50 символов:', encodedScript.substring(0, 50));
+            
+            // Декодируем и выполняем
+            this.executeScript(encodedScript);
+            
+        } catch (error) {
+            console.error('❌ Ошибка загрузки:', error);
+            this.showError('Ошибка загрузки скрипта: ' + error.message);
+        }
     }
     
     checkLicense() {
@@ -31,54 +73,21 @@ window.SimpleLicenseChecker = class SimpleLicenseChecker {
         return isValid;
     }
     
-    async loadScript() {
-        console.log('🚀 Начало загрузки скрипта...');
-        
-        if (!this.checkLicense()) {
-            console.error('⛔ Лицензия недействительна, останавливаемся');
-            this.showError('Лицензия недействительна для ' + this.domain);
-            return;
-        }
-        
-        console.log('✅ Лицензия проверена, загружаем скрипт...');
-        
-        // Генерируем имя файла
-        const fileName = this.generateFileName();
-        console.log('📄 Имя файла скрипта:', fileName);
-        
-        // URL на GitHub
-        const scriptUrl = `https://raw.githubusercontent.com/seiline-grey/my-scripts-licenses/main/scripts/${fileName}`;
-        console.log('🌍 Загружаем из:', scriptUrl);
-        
-        try {
-            // Загружаем файл
-            const response = await fetch(scriptUrl);
-            console.log('📡 Ответ сервера:', response.status, response.statusText);
-            
-            if (!response.ok) {
-                throw new Error('Не удалось загрузить скрипт: ' + response.status);
-            }
-            
-            // Получаем закодированный скрипт
-            const encodedScript = await response.text();
-            console.log('✅ Скрипт загружен, размер:', encodedScript.length, 'символов');
-            
-            // Декодируем и выполняем
-            this.executeScript(encodedScript);
-            
-        } catch (error) {
-            console.error('❌ Ошибка загрузки:', error);
-            this.showError('Ошибка загрузки скрипта: ' + error.message);
-        }
-    }
-    
     generateFileName() {
-        // Домен + ключ → base64 → чистим → обрезаем
+        // ИСПРАВЛЕНО: domain + licenseKey
         const str = this.domain + this.licenseKey;
+        console.log('🔤 Строка для кодирования:', str);
+        
         const base64 = btoa(str);
+        console.log('📊 Base64:', base64);
+        
         const clean = base64.replace(/[=+/]/g, '');
-        const short = clean.substring(0, 20);
-        return short + '.js';
+        console.log('🧹 Очищенный:', clean);
+        
+        const fileName = clean.substring(0, 20) + '.js';
+        console.log('📄 Финальное имя файла:', fileName);
+        
+        return fileName;
     }
     
     executeScript(encodedScript) {
@@ -88,11 +97,17 @@ window.SimpleLicenseChecker = class SimpleLicenseChecker {
             // Декодируем из base64
             const decodedScript = atob(encodedScript);
             console.log('✅ Скрипт декодирован, размер:', decodedScript.length, 'символов');
+            console.log('🔍 Проверяем подпись...');
             
             // Проверяем подпись
             if (!decodedScript.includes('/* SIGNED:F1K3Y9A8 */')) {
-                throw new Error('Неверная подпись скрипта');
+                console.error('❌ Неверная подпись скрипта!');
+                console.log('Первые 200 символов скрипта:', decodedScript.substring(0, 200));
+                this.showError('Неверная подпись скрипта');
+                return;
             }
+            
+            console.log('✅ Подпись верна');
             
             // Выполняем скрипт
             console.log('⚡ Выполняем скрипт...');
@@ -144,4 +159,3 @@ window.SimpleLicenseChecker = class SimpleLicenseChecker {
 };
 
 console.log('✅ SimpleLicenseChecker готов к использованию');
-console.log('📖 Использование: new SimpleLicenseChecker("ВАШ_КЛЮЧ").loadScript()');
